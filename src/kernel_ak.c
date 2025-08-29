@@ -38,7 +38,7 @@ void clear_ak() {
 	};
 };
 
-void main_al() {
+void main_ak() {
 	clear_ak();
 	print_ak("Arca kernel loaded!\nWelcome to Arca OS!", 0);
 };

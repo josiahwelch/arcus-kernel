@@ -16,13 +16,13 @@ int print_ak(char *msg, unsigned int line) {
 			i = (line * 80 * 2);
 			*msg++;
 		} else {
-			mem = (char *) 0xb8000;
+			mem[i] = *msg;
 			*msg++;
 			i++;
 			mem[i] = COLOR_SCHEME;
 			i++;
-		};
-	};
+		}
+	}
 
 	return 1;
 }
@@ -35,10 +35,11 @@ void clear_ak() {
 		i++;
 		mem[i] = COLOR_SCHEME;
 		i++;
-	};
-};
+	}
+}
 
 void main_ak() {
 	clear_ak();
-	print_ak("Arca kernel loaded!\nWelcome to Arca OS!", 0);
-};
+	print_ak("Arca kernel loaded!", 0);
+	print_ak("Arca OS is loading...", 1);
+}

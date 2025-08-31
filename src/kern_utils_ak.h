@@ -73,14 +73,6 @@ char get_ascii_char() {
 	char prev_key_c = get_prev_key();
 	char *caps_ptr = (char *)CAPS_BUFF;
 
-	// TODO: Get the shift key to work properly
-
-	// Handles the CapsLock button
-	if (key_c == KEY_CAPSLOCK_PRESSED) {
-		if (caps_ptr[0] == 0x00) {caps_ptr[0] = 0x01;}
-		else if (caps_ptr[0] == 0x01) {caps_ptr[0] = 0x00;}
-	}
-
 	unsigned int capital = (caps_ptr[0] == 0x01);
 
 	char key;
@@ -197,7 +189,6 @@ char get_ascii_char() {
 
 		case KEY_W_PRESSED:
 			key = 'W';
-			key = '3';
 			if (!capital) {key = 'w';}
 			break;
 

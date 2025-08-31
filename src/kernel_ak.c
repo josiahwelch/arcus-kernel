@@ -10,6 +10,7 @@
 
 #define COLOR_SCHEME 0x07 // light gray bg with black fg
 #define LINE_BUFF 0xFFEE00 // Used to create a line to be printed
+#define CHAR_BUFF 0xFFEDFF // Used to store last char
 
 void main_ak() {
 	clear_ak();
@@ -21,8 +22,11 @@ void main_ak() {
 	int i = 0;
 	msg = "        \0";
 	char key = ' ';
+	char *prev_ptr = (char *)CHAR_BUFF;
+	char prev_key;
 	while (1) {
 		if (i > 7) {i = 0;}
+		prev_key = prev_ptr[0];
 		switch(get_key()) {
 			case KEY_A_PRESSED:
 				key = 'A';
@@ -31,6 +35,8 @@ void main_ak() {
 				key = 'B';
 				break;
 		}
+		if (prev_key == KEY_A_PRESSED && key == 'A') {key = 'C';}
+		if (prev_key == KEY_B_PRESSED && key == 'B') {key = 'C';}
 		msg[i] = key;
 		print_ak(msg, 2);
 		i++;

@@ -505,7 +505,9 @@ char get_key(){
     kb_keycode k;
 	char *ptr = (char *)0xFFEDFF;
     while(k=get_keycode()){
-        if(k<=0x127)return k;//if keycode is valid ascii, return
-		ptr = (char)k;
+        if(k<=0x127) {
+			ptr[0] = k;
+			return k;//if keycode is valid ascii, return
+		}
     }
 }

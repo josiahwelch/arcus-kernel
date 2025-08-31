@@ -1,2 +1,2 @@
-# arca-kernel
-Kernel for the Arca operating system
+# arcus-kernel
+Kernel for the Arcus operating system

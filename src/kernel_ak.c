@@ -8,7 +8,7 @@
 #include "keyboard.c"
 #include "kern_utils_ak.h"
 
-#define COLOR_SCHEME 0x07 	// light gray bg with black fg
+#define COLOR_SCHEME 0x08 	// light gray bg with black fg
 #define LINE_BUFF 0x00EE00 	// Used to create a line to be printed
 #define CHAR_BUFF 0x00EDFF 	// Used to store last char
 #define SHIFT_BUFF 0x00EDF0	// Used to indicate if shift is activated 
@@ -18,6 +18,7 @@ void main_ak() {
 	clear_ak();
 	print_ak("Arcus kernel loaded!", 0);
 	print_ak("Arcus OS is loading...", 1);
+	enable_cursor(0, 15);
 	char *msg = (char *)0xFFEE00;
 	int i = 0;
 	msg = "        \0";
@@ -25,6 +26,7 @@ void main_ak() {
 		if (i > 7) {i = 0;}
 		msg[i] = get_ascii_char();
 		print_ak(msg, 2);
+		update_cursor(i, 2);
 		i++;
 	}
 

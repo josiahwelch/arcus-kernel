@@ -1,10 +1,16 @@
 #include "keyboard.h"
 
-#define COLOR_SCHEME 0x07 	// light gray bg with black fg
+#define COLOR_SCHEME 0x08 	// light gray bg with black fg
 #define LINE_BUFF 0x00EE00 	// Used to create a line to be printed
 #define CHAR_BUFF 0x00EDFF 	// Used to store last char
 #define SHIFT_BUFF 0x00EDF0	// Used to indicate if shift is activated 
 #define CAPS_BUFF 0x00EDE0	// Used to indicate if CapsLock is active
+
+static unsigned char inb(unsigned short port) {
+    unsigned char ret;
+    asm volatile ( "inb %1, %0" : "=a"(ret) : "Nd"(port) );
+    return ret;
+} 
 
 static const kb_keycode us_querty_keycodes[0xE0] = {
     KEY_INVALID,//0x00 invalid
@@ -475,13 +481,6 @@ static const kb_keycode us_querty_keycodes_extra1[0xEE] = {
     KEY_INVALID,//0xEC,MULTIMEDIA
     KEY_INVALID,//0xED,MULTIMEDIA
 };
-
-static unsigned char inb(unsigned short port) {//you can remove this if your kernel already has an inb implementation
-    unsigned char ret;
-    asm volatile ( "inb %1, %0" : "=a"(ret) : "Nd"(port) );
-    return ret;
-} 
-
 static unsigned char get_scancode(){
     while(!(inb(0x64) & 1)) asm volatile ("pause"); //check keyboard status port, see if there's a key available
     return inb(0x60); //get a key from the data port

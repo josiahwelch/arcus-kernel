@@ -3,11 +3,17 @@
 // Utility c file
 #ifndef KERN_UTILS_AK_H
 #define KERN_UTILS_AK_H
-#define COLOR_SCHEME 0x07 	// light gray bg with black fg
+
+#define COLOR_SCHEME 0x08 	// light gray bg with black fg
 #define LINE_BUFF 0x00EE00 	// Used to create a line to be printed
 #define CHAR_BUFF 0x00EDFF 	// Used to store last char
 #define SHIFT_BUFF 0x00EDF0	// Used to indicate if shift is activated 
 #define CAPS_BUFF 0x00EDE0	// Used to indicate if CapsLock is active
+#define VGA_WIDTH 80
+
+static inline void outb(unsigned short port, unsigned char val) {
+	    asm volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
+}
 
 void cvtostr(char *str, char char_input) {
 	int digit1 = 0;
@@ -214,6 +220,31 @@ char get_ascii_char() {
 			break;
 	}
 	return key;
+}
+
+void enable_cursor(unsigned char cursor_start, unsigned char cursor_end)
+{
+		outb(0x3D4, 0x0A);
+		outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+
+		outb(0x3D4, 0x0B);
+		outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
+}
+
+void disable_cursor()
+{
+		outb(0x3D4, 0x0A);
+			outb(0x3D5, 0x20);
+}
+
+void update_cursor(int x, int y)
+{
+		unsigned short pos = y * VGA_WIDTH + x;
+
+			outb(0x3D4, 0x0F);
+				outb(0x3D5, (unsigned char) (pos & 0xFF));
+					outb(0x3D4, 0x0E);
+						outb(0x3D5, (unsigned char) ((pos >> 8) & 0xFF));
 }
 
 #endif KERN_UTILS_AK_H

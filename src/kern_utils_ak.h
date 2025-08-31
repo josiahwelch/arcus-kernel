@@ -1,3 +1,6 @@
+// Josiah Welch
+// 8/30/25
+// Utility c file
 #ifndef KERN_UTILS_AK_H
 #define KERN_UTILS_AK_H
 #define COLOR_SCHEME 0x07 	// light gray bg with black fg

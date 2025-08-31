@@ -1,6 +1,6 @@
 ; Josiah Welch
 ; 8/29/25
-; Assembly code to boot Arca kernel from Grub
+; Assembly code to boot Arcus kernel from Grub or other bootloader
 
 ; NOTE: heavily influenced by https://github.com/chipsetx/Simple-Kernel-in-C-and-Assembly#
 

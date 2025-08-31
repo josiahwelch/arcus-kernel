@@ -16,8 +16,8 @@
 
 void main_ak() {
 	clear_ak();
-	print_ak("Arca kernel loaded!", 0);
-	print_ak("Arca OS is loading...", 1);
+	print_ak("Arcus kernel loaded!", 0);
+	print_ak("Arcus OS is loading...", 1);
 	char *msg = (char *)0xFFEE00;
 	int i = 0;
 	msg = "        \0";

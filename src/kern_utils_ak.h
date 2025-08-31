@@ -1,10 +1,35 @@
 #ifndef KERN_UTILS_AK_H
 #define KERN_UTILS_AK_H
-
 #define COLOR_SCHEME 0x07 	// light gray bg with black fg
-#define LINE_BUFF 0xFFEE00 	// Used to create a line to be printed
-#define CHAR_BUFF 0xFFEDFF 	// Used to store last char
-#define SHIFT_BUFF 0xFFEDFE	// Used to indicate if shift is activated 
+#define LINE_BUFF 0x00EE00 	// Used to create a line to be printed
+#define CHAR_BUFF 0x00EDFF 	// Used to store last char
+#define SHIFT_BUFF 0x00EDF0	// Used to indicate if shift is activated 
+#define CAPS_BUFF 0x00EDE0	// Used to indicate if CapsLock is active
+
+void cvtostr(char *str, char char_input) {
+	int digit1 = 0;
+	int digit2 = 0;
+	int digit3 = 0;
+	unsigned char chr = char_input;
+
+	while (1) {
+		if (chr > 99) {
+			digit1++;
+			chr -= 100;
+		}else if (chr > 9) {
+			digit2++;
+			chr -= 10;
+		} else {
+			digit3 = chr;
+			break;
+		}
+	}
+
+	str[0] = digit1 + 48;
+	str[1] = digit2 + 48;
+	str[2] = digit3 + 48;
+	str[3] = '\0';
+}
 
 int print_ak(char *msg, unsigned int line) {
 	char *mem = (char *) 0xb8000;
@@ -37,11 +62,27 @@ void clear_ak() {
 	}
 }
 
+char get_prev_key() {
+	char *ptr = (char *)CHAR_BUFF; 	// Gets the previous char code from buffer
+	char prev_key_c = ptr[0]; 		// Gets the first byte at the address 0xFFEDFF
+	return prev_key_c;
+}
+
 char get_ascii_char() {
-	char *prev_ptr = (char *)CHAR_BUFF; // Gets the previous char code from buffer
-	char prev_key_c = prev_ptr[0]; // Gets the first byte at the address 0xFFEDFF
-	int capital = (prev_key_c == KEY_LEFT_SHIFT_PRESSED | prev_key_c == KEY_RIGHT_SHIFT_PRESSED);
 	char key_c = get_key();
+	char prev_key_c = get_prev_key();
+	char *caps_ptr = (char *)CAPS_BUFF;
+
+	// TODO: Get the shift key to work properly
+
+	// Handles the CapsLock button
+	if (key_c == KEY_CAPSLOCK_PRESSED) {
+		if (caps_ptr[0] == 0x00) {caps_ptr[0] = 0x01;}
+		else if (caps_ptr[0] == 0x01) {caps_ptr[0] = 0x00;}
+	}
+
+	unsigned int capital = (caps_ptr[0] == 0x01);
+
 	char key;
 	switch (key_c) {
 		case KEY_A_PRESSED:
@@ -156,6 +197,7 @@ char get_ascii_char() {
 
 		case KEY_W_PRESSED:
 			key = 'W';
+			key = '3';
 			if (!capital) {key = 'w';}
 			break;
 

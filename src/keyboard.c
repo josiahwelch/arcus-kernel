@@ -1,5 +1,11 @@
 #include "keyboard.h"
 
+#define COLOR_SCHEME 0x07 	// light gray bg with black fg
+#define LINE_BUFF 0x00EE00 	// Used to create a line to be printed
+#define CHAR_BUFF 0x00EDFF 	// Used to store last char
+#define SHIFT_BUFF 0x00EDF0	// Used to indicate if shift is activated 
+#define CAPS_BUFF 0x00EDE0	// Used to indicate if CapsLock is active
+
 static const kb_keycode us_querty_keycodes[0xE0] = {
     KEY_INVALID,//0x00 invalid
     KEY_ESC_PRESSED,//0x01 ESCAPE
@@ -491,7 +497,7 @@ kb_keycode get_keycode(){
             if(get_scancode()==0xE0&&get_scancode()==0xAA)return KEY_PRINTSCR_RELEASED;//special case for printscr up
         }else if(scancode<0xEE){//don't access array beyond limit
             return us_querty_keycodes_extra1[scancode];
-        }
+		}
     }else if(scancode==0xE1){
         if(get_scancode()==0x1D&&get_scancode()==0x45&&get_scancode()==0xE1&&get_scancode()==0x9D&&get_scancode()==0xC5)return KEY_PAUSE;//special case for pause key
     }else if(scancode<0xE0){//don't access array beyond limit
@@ -500,13 +506,22 @@ kb_keycode get_keycode(){
     return KEY_INVALID;//fallback to invalid
 }
 
-
 char get_key(){
     kb_keycode k;
-	char *ptr = (char *)0xFFEDFF;
+	char *caps_ptr = (char *)CAPS_BUFF;
     while(k=get_keycode()){
         if(k<=0x127) {
-			ptr[0] = k;
+			char *ptr = (char *)0xFFEDFF;
+			ptr[0] = k; // Sets the key buffer to the previous value
+
+			// TODO: Get the shift key to work properly
+
+			// Handles the CapsLock button
+			if (k == KEY_CAPSLOCK_PRESSED) {
+				if (caps_ptr[0] == 0x00) {caps_ptr[0] = 0x01;}
+				else if (caps_ptr[0] == 0x01) {caps_ptr[0] = 0x00;}
+			}
+
 			return k;//if keycode is valid ascii, return
 		}
     }

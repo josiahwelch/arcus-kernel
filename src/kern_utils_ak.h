@@ -239,12 +239,12 @@ void disable_cursor()
 
 void update_cursor(int x, int y)
 {
-		unsigned short pos = y * VGA_WIDTH + x;
+	unsigned short pos = y * VGA_WIDTH + x;
 
-			outb(0x3D4, 0x0F);
-				outb(0x3D5, (unsigned char) (pos & 0xFF));
-					outb(0x3D4, 0x0E);
-						outb(0x3D5, (unsigned char) ((pos >> 8) & 0xFF));
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (unsigned char) (pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (unsigned char) ((pos >> 8) & 0xFF));
 }
 
 #endif KERN_UTILS_AK_H

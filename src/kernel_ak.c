@@ -21,23 +21,9 @@ void main_ak() {
 	char *msg = (char *)0xFFEE00;
 	int i = 0;
 	msg = "        \0";
-	char key = ' ';
-	char *prev_ptr = (char *)CHAR_BUFF;
-	char prev_key;
 	while (1) {
 		if (i > 7) {i = 0;}
-		prev_key = prev_ptr[0];
-		switch(get_key()) {
-			case KEY_A_PRESSED:
-				key = 'A';
-				break;
-			case KEY_B_PRESSED:
-				key = 'B';
-				break;
-		}
-		if (prev_key == KEY_A_PRESSED && key == 'A') {key = 'C';}
-		if (prev_key == KEY_B_PRESSED && key == 'B') {key = 'C';}
-		msg[i] = key;
+		msg[i] = get_ascii_char();
 		print_ak(msg, 2);
 		i++;
 	}

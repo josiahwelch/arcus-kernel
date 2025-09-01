@@ -10,6 +10,6 @@ typedef struct {
 
 typedef struct {
 		unsigned short limit;
-		unsigned long base;
+		unsigned int base;
 } __attribute__((packed)) idtr_t;
 #endif

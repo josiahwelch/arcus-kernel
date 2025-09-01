@@ -16,12 +16,23 @@ void exception_handler() {
 	    __asm__ volatile ("cli; hlt"); // Completely hangs the computer
 }
 
-void main_ak() {
-	// Creates an IDT table
-	__attribute__((aligned(0x10))) 
-	static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for performance
-	static idtr_t idtr;
+// Creates an IDT table
+__attribute__((aligned(0x10))) 
+static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for performance
+static idtr_t idtr;
 
+void idt_set_descriptor(unsigned char vector, void* isr, unsigned char flags);
+void idt_set_descriptor(unsigned char vector, void* isr, unsigned char flags) {
+	idt_entry_t* descriptor = &idt[vector];
+
+	descriptor->isr_low        = (unsigned int)isr & 0xFFFF;
+	descriptor->kernel_cs      = 0x08; // this value can be whatever offset your kernel code selector is in your GDT
+	descriptor->attributes     = flags;
+	descriptor->isr_high       = (unsigned int)isr >> 16;
+	descriptor->reserved       = 0;
+}
+
+void main_ak() {
 	clear_ak();
 	print_ak("Arcus kernel loaded!", 0);
 	print_ak("Arcus OS is loading...", 1);

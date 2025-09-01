@@ -7,4 +7,9 @@ typedef struct {
 	unsigned char attributes;   // Type and attributes; see the IDT page
 	unsigned short isr_high;     // The higher 16 bits of the ISR's address
 } __attribute__((packed)) idt_entry_t;
+
+typedef struct {
+		uint16_t	limit;
+			uint32_t	base;
+} __attribute__((packed)) idtr_t;
 #endif

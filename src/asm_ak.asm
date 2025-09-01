@@ -5,6 +5,7 @@
 ; NOTE: heavily influenced by https://github.com/chipsetx/Simple-Kernel-in-C-and-Assembly#
 
 bits 32
+default rel ; Make all symbol references PC-relative
 
 ; Macros for IDT
 %macro isr_err_stub 1
@@ -51,6 +52,16 @@ isr_no_err_stub 28
 isr_no_err_stub 29
 isr_err_stub    30
 isr_no_err_stub 31
+
+; Stub table
+section .data ; Move table to .data section
+global isr_stub_table
+isr_stub_table:
+%assign i 0 
+%rep    32 
+    dd isr_stub_%+i - $$ ; Store relative offset from section start
+	%assign i i+1 
+	%endrep
 
 section .text
 	align 4

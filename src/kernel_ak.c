@@ -5,28 +5,31 @@
 //NOTE: heavily influenced by https://github.com/chipsetx/Simple-Kernel-in-C-and-Assembly#
 
 //#include "ps2_ak.h"
+#include "define.h"
 #include "keyboard.c"
 #include "kern_utils_ak.h"
-
-#define COLOR_SCHEME 0x08 	// light gray bg with black fg
-#define LINE_BUFF 0x00EE00 	// Used to create a line to be printed
-#define CHAR_BUFF 0x00EDFF 	// Used to store last char
-#define SHIFT_BUFF 0x00EDF0	// Used to indicate if shift is activated 
-#define CAPS_BUFF 0x00EDE0	// Used to indicate if CapsLock is active
+#include "idt.h"
 
 void main_ak() {
+	// Creates an IDT table
+	__attribute__((aligned(0x10))) 
+	static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for performance
+
 	clear_ak();
 	print_ak("Arcus kernel loaded!", 0);
 	print_ak("Arcus OS is loading...", 1);
-	enable_cursor(0, 15);
+
+	enable_cursor(4, 5);
 	char *msg = (char *)0xFFEE00;
 	int i = 0;
 	msg = "        \0";
 	while (1) {
 		if (i > 7) {i = 0;}
 		msg[i] = get_ascii_char();
+		//unsigned short *x_ptr = (unsigned short *)CURSOR_POS_X;
 		print_ak(msg, 2);
-		update_cursor(i, 2);
+		update_cursor(i, 3);
+		//if (msg[i] == 'A') {move_cursor_up();}
 		i++;
 	}
 

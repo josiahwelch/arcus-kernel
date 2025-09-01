@@ -3,13 +3,7 @@
 // Utility c file
 #ifndef KERN_UTILS_AK_H
 #define KERN_UTILS_AK_H
-
-#define COLOR_SCHEME 0x08 	// light gray bg with black fg
-#define LINE_BUFF 0x00EE00 	// Used to create a line to be printed
-#define CHAR_BUFF 0x00EDFF 	// Used to store last char
-#define SHIFT_BUFF 0x00EDF0	// Used to indicate if shift is activated 
-#define CAPS_BUFF 0x00EDE0	// Used to indicate if CapsLock is active
-#define VGA_WIDTH 80
+#include "define.h"
 
 static inline void outb(unsigned short port, unsigned char val) {
 	    asm volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
@@ -237,14 +231,27 @@ void disable_cursor()
 			outb(0x3D5, 0x20);
 }
 
-void update_cursor(int x, int y)
+void update_cursor(unsigned char x, unsigned char y)
 {
 	unsigned short pos = y * VGA_WIDTH + x;
+
+	unsigned char *x_ptr = (unsigned char *)CURSOR_POS_X;
+	unsigned char *y_ptr = (unsigned char *)CURSOR_POS_Y;
+
+	x_ptr[0] = x;
+	y_ptr[0] = y;
 
 	outb(0x3D4, 0x0F);
 	outb(0x3D5, (unsigned char) (pos & 0xFF));
 	outb(0x3D4, 0x0E);
 	outb(0x3D5, (unsigned char) ((pos >> 8) & 0xFF));
+}
+
+void move_cursor_up() {
+	unsigned char *x_ptr = (unsigned char *)CURSOR_POS_X;
+	unsigned char *y_ptr = (unsigned char *)CURSOR_POS_Y;
+	if (y_ptr[0] > 0) {y_ptr[0]--;}
+	update_cursor(x_ptr[0], y_ptr[0]);
 }
 
 #endif KERN_UTILS_AK_H

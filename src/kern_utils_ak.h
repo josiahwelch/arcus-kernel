@@ -6,7 +6,11 @@
 #include "define.h"
 
 static inline void outb(unsigned short port, unsigned char val) {
-	    asm volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
+	asm volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
+}
+
+void io_wait(void) {
+	outb(0x80, 0);
 }
 
 void cvtostr(char *str, char char_input) {

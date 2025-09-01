@@ -9,6 +9,7 @@
 #include "keyboard.c"
 #include "kern_utils_ak.h"
 #include "idt.h"
+#include "pid.h"
 
 __attribute__((noreturn))
 void exception_handler(void);

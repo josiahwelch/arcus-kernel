@@ -9,7 +9,7 @@
 #include "keyboard.c"
 #include "kern_utils_ak.h"
 #include "idt.h"
-#include "pid.h"
+#include "pic.h"
 
 __attribute__((noreturn))
 void exception_handler(void);
@@ -56,6 +56,8 @@ void main_ak() {
 	clear_ak();
 	print_ak("Arcus kernel loaded!", 0);
 	print_ak("Arcus OS is loading...", 1);
+
+	idt_init();
 
 	enable_cursor(4, 5);
 	char *msg = (char *)0xFFEE00;

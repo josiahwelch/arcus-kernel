@@ -67,10 +67,23 @@ section .text
 	align 4
 	dd 0x1badb002			; Magic #
 	dd 0x00					; Flags
-	dd - (0x1badb002 + 0x00); Checksum
+	dd - (0x1badb002 + 0x00); Checksum 
 
 global start
 extern main_ak
+global switch_task
+
+switch_task:
+    ; Save current task's state
+	mov eax, [esp + 4] ; Pointer to current task's Task struct
+	mov [eax], esp     ; Save ESP
+	mov [eax + 4], ebx ; Save EIP (approximate, adjust as needed)
+
+	; Load next task's state
+	mov eax, [esp + 8] ; Pointer to next task's Task struct
+	mov esp, [eax]     ; Restore ESP
+	mov ebx, [eax + 4] ; Restore EIP
+	jmp ebx            ; Jump to next task
 
 start:
 	cli						; Stops interrupts

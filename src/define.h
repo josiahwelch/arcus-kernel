@@ -6,4 +6,4 @@
 #define CURSOR_POS_Y 0x00EDDA	// Stores the y value of the cursor position 
 #define CURSOR_POS_X 0x00EDD0	// Stores the x value of the cursor position 
 #define VGA_WIDTH 80 			// Width of the screen in characters
-#define IDT_MAX_DESCRIPTORS 0	// Stores number of entries in IDT
+#define IDT_MAX_DESCRIPTORS 1	// Stores number of entries in IDT

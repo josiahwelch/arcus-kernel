@@ -10,6 +10,8 @@
 #include "kern_utils_ak.h"
 #include "idt.h"
 #include "pic.h"
+#include "task_mgr.h"
+#include "interrupts.h"
 
 __attribute__((noreturn))
 void exception_handler(void);
@@ -37,6 +39,24 @@ void idt_set_descriptor(unsigned char vector, void* isr, unsigned char flags) {
 	descriptor->isr_high       = (unsigned int)isr >> 16;
 	descriptor->reserved       = 0;
 }
+void set_idt_gate(int n, unsigned int handler) {
+	idt[n].isr_low  = handler & 0xFFFF;
+	idt[n].kernel_cs    = 0x08;          // kernel code segment selector (usually 0x08)
+	idt[n].reserved        = 0;
+	idt[n].attributes   = 0x8E;          // present, ring 0, 32-bit interrupt gate
+	idt[n].isr_high = (handler >> 16) & 0xFFFF;
+}
+
+extern void lidt(void* base, unsigned short size);
+
+void lidt(void* base, unsigned short size) {
+	struct {
+		unsigned short length;
+		unsigned int base;
+	} __attribute__((packed)) IDTR = { size, (unsigned int) base };
+
+	__asm__ volatile ("lidt %0" : : "m"(IDTR));
+}
 
 void idt_init(void);
 void idt_init() {
@@ -58,6 +78,12 @@ void main_ak() {
 	print_ak("Arcus OS is loading...", 1);
 
 	idt_init();
+
+    // Register keyboard handler at vector 0x21
+	set_idt_gate(0x21, (unsigned int)keyboard_handler);
+
+	// Load IDT
+	lidt(idt, sizeof(idtr));
 
 	enable_cursor(4, 5);
 	char *msg = (char *)0xFFEE00;

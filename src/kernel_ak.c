@@ -11,66 +11,6 @@
 #include "idt.h"
 #include "pic.h"
 #include "task_mgr.h"
-#include "interrupts.h"
-
-__attribute__((noreturn))
-void exception_handler(void);
-void exception_handler() {
-	    __asm__ volatile ("cli; hlt"); // Completely hangs the computer
-}
-
-static int vectors[IDT_MAX_DESCRIPTORS];
-
-extern void* isr_stub_table[];
-
-// Creates an IDT table
-__attribute__((aligned(0x10))) 
-static idt_entry_t idt[256]; // Create an array of IDT entries; aligned for performance
-static idtr_t idtr;
-
-// Helper function for entry definition
-void idt_set_descriptor(unsigned char vector, void* isr, unsigned char flags);
-void idt_set_descriptor(unsigned char vector, void* isr, unsigned char flags) {
-	idt_entry_t* descriptor = &idt[vector];
-
-	descriptor->isr_low        = (unsigned int)isr & 0xFFFF;
-	descriptor->kernel_cs      = 0x08; // this value can be whatever offset your kernel code selector is in your GDT
-	descriptor->attributes     = flags;
-	descriptor->isr_high       = (unsigned int)isr >> 16;
-	descriptor->reserved       = 0;
-}
-void set_idt_gate(int n, unsigned int handler) {
-	idt[n].isr_low  = handler & 0xFFFF;
-	idt[n].kernel_cs    = 0x08;          // kernel code segment selector (usually 0x08)
-	idt[n].reserved        = 0;
-	idt[n].attributes   = 0x8E;          // present, ring 0, 32-bit interrupt gate
-	idt[n].isr_high = (handler >> 16) & 0xFFFF;
-}
-
-extern void lidt(void* base, unsigned short size);
-
-void lidt(void* base, unsigned short size) {
-	struct {
-		unsigned short length;
-		unsigned int base;
-	} __attribute__((packed)) IDTR = { size, (unsigned int) base };
-
-	__asm__ volatile ("lidt %0" : : "m"(IDTR));
-}
-
-void idt_init(void);
-void idt_init() {
-	idtr.base = (unsigned int *)&idt[0];
-	idtr.limit = (unsigned short)sizeof(idt_entry_t) * IDT_MAX_DESCRIPTORS - 1;
-
-	for (unsigned char vector = 0; vector < 32; vector++) {
-		idt_set_descriptor(vector, isr_stub_table[vector], 0x8E);
-		vectors[vector] = 1;
-	}
-
-	__asm__ volatile ("lidt %0" : : "m"(idtr)); // load the new IDT
-	__asm__ volatile ("sti"); // set the interrupt flag
-}
 
 void main_ak() {
 	clear_ak();
@@ -78,12 +18,6 @@ void main_ak() {
 	print_ak("Arcus OS is loading...", 1);
 
 	idt_init();
-
-    // Register keyboard handler at vector 0x21
-	set_idt_gate(0x21, (unsigned int)keyboard_handler);
-
-	// Load IDT
-	lidt(idt, sizeof(idtr));
 
 	enable_cursor(4, 5);
 	char *msg = (char *)0xFFEE00;

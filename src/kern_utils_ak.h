@@ -4,9 +4,10 @@
 #ifndef KERN_UTILS_AK_H
 #define KERN_UTILS_AK_H
 #include "define.h"
+#include <stdint.h>
 
-static inline void outb(unsigned short port, unsigned char val) {
-	asm volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
+static inline void outb(uint16_t port, uint8_t val) {
+	__asm__ volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
 }
 
 void io_wait(void) {
@@ -80,7 +81,7 @@ char get_ascii_char() {
 	char prev_key_c = get_prev_key();
 	char *caps_ptr = (char *)CAPS_BUFF;
 
-	unsigned int capital = (caps_ptr[0] == 0x01);
+	uint8_t capital = (caps_ptr[0] == 0x01);
 
 	char key;
 	switch (key_c) {
@@ -220,7 +221,12 @@ char get_ascii_char() {
 	return key;
 }
 
-void enable_cursor(unsigned char cursor_start, unsigned char cursor_end)
+void print_ak_buff(uint32_t line) {
+	char *msg = (char *)LINE_BUFF;
+	print_ak(msg, line);
+}
+
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
 {
 		outb(0x3D4, 0x0A);
 		outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
@@ -235,27 +241,29 @@ void disable_cursor()
 			outb(0x3D5, 0x20);
 }
 
-void update_cursor(unsigned char x, unsigned char y)
+void update_cursor(uint8_t x, uint8_t y)
 {
-	unsigned short pos = y * VGA_WIDTH + x;
+	uint16_t pos = y * VGA_WIDTH + x;
 
-	unsigned char *x_ptr = (unsigned char *)CURSOR_POS_X;
-	unsigned char *y_ptr = (unsigned char *)CURSOR_POS_Y;
+	uint8_t *x_ptr = (uint8_t *)CURSOR_POS_X;
+	uint8_t *y_ptr = (uint8_t *)CURSOR_POS_Y;
 
 	x_ptr[0] = x;
 	y_ptr[0] = y;
 
 	outb(0x3D4, 0x0F);
-	outb(0x3D5, (unsigned char) (pos & 0xFF));
+	outb(0x3D5, (uint8_t) (pos & 0xFF));
 	outb(0x3D4, 0x0E);
-	outb(0x3D5, (unsigned char) ((pos >> 8) & 0xFF));
+	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 }
-
+/*
 void move_cursor_up() {
-	unsigned char *x_ptr = (unsigned char *)CURSOR_POS_X;
-	unsigned char *y_ptr = (unsigned char *)CURSOR_POS_Y;
+	uint8_t *x_ptr = (uint8_t *)CURSOR_POS_X;
+	uint8_t *y_ptr = (uint8_t *)CURSOR_POS_Y;
+
 	if (y_ptr[0] > 0) {y_ptr[0]--;}
 	update_cursor(x_ptr[0], y_ptr[0]);
 }
+*/
 
 #endif KERN_UTILS_AK_H

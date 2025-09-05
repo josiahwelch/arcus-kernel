@@ -121,8 +121,7 @@ void get_input(char *in_ptr, unsigned int length, bool echo, unsigned int c_row,
 			char_read = handle_key_input();
 			if (char_read == 0x00) {i--;} // Ignores CapsLock as key
 			else if (char_read == 0x01) { // Sets the char to space
-				if (i < length - 1) {i--;}
-				//else {i=length - 1;}
+				i--;
 				char_proc = ' ';
 			}
 			else {char_proc = char_read;}
@@ -137,11 +136,15 @@ void get_input(char *in_ptr, unsigned int length, bool echo, unsigned int c_row,
 				i = length + 1;
 			}
 			if (char_read == 0x01) { // Backspace secondary decrement
-				i -= (i == length - 1) + 1;
+				i--;
 			}
 		}
-		if (i>=length) {i = length-1;} // Resets i
+		if (i>=length) {i = length;} // Resets i
 		else {i = 0;}
+		if (handle_key_input() == 0x01) {
+			vid_mem[c_start + 2 * (length - 1)] = ' ';
+			i--;
+		}
 	}
 	in_ptr = inp_mem;
 }

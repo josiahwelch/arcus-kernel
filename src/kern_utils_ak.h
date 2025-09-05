@@ -61,28 +61,30 @@ void clear_ak() {
 		i++;
 	}
 }
+
+void print_ak_buff(unsigned int line) {
+	char *msg = (char *)LINE_BUFF;
+	print_ak(msg, line);
+}
+
 char get_prev_key() {
 	char *ptr = (char *)CHAR_BUFF; 	// Gets the previous char code from buffer
 	char prev_key_c = ptr[0]; 		// Gets the first byte at the address 0xFFEDFF
 	return prev_key_c;
 }
 
-uint16_t key_presses_enums[] = {KEY_A_PRESSED, KEY_B_PRESSED, KEY_C_PRESSED, KEY_D_PRESSED, KEY_E_PRESSED, KEY_F_PRESSED, KEY_G_PRESSED, KEY_H_PRESSED, KEY_I_PRESSED, KEY_J_PRESSED, KEY_K_PRESSED, KEY_L_PRESSED, KEY_M_PRESSED, KEY_N_PRESSED, KEY_O_PRESSED, KEY_P_PRESSED, KEY_Q_PRESSED, KEY_R_PRESSED, KEY_S_PRESSED, KEY_T_PRESSED, KEY_U_PRESSED, KEY_V_PRESSED, KEY_W_PRESSED, KEY_X_PRESSED, KEY_Y_PRESSED, KEY_Z_PRESSED, KEY_SPACE_PRESSED, /*start of non-regular*/ KEY_CAPSLOCK_PRESSED, KEY_LEFT_SHIFT_PRESSED, KEY_RIGHT_SHIFT_PRESSED};
-
-char key_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
-char lower_key_chars[] = "abcdefghijklmnopqrstuvwxyz ";
-// start of non-regular
+char key_presses_enums[] = {KEY_A_PRESSED, KEY_B_PRESSED, KEY_C_PRESSED, KEY_D_PRESSED, KEY_E_PRESSED, KEY_F_PRESSED, KEY_G_PRESSED, KEY_H_PRESSED, KEY_J_PRESSED, KEY_K_PRESSED, KEY_L_PRESSED, KEY_M_PRESSED, KEY_N_PRESSED, KEY_O_PRESSED, KEY_P_PRESSED, KEY_Q_PRESSED, KEY_R_PRESSED, KEY_S_PRESSED, KEY_T_PRESSED, KEY_U_PRESSED, KEY_V_PRESSED, KEY_W_PRESSED, KEY_X_PRESSED, KEY_Y_PRESSED, KEY_Z_PRESSED, KEY_SPACE_PRESSED};
+char upper_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+char lower_chars[] = "abcdefghijklmnopqrstuvwxyz ";
 
 char handle_key_input() {
 	char key_c = get_key();
 	char prev_key_c = get_prev_key();
-	uint8_t *caps_ptr = (uint8_t *)CAPS_BUFF;
+	char *caps_ptr = (char *)CAPS_BUFF;
+
 	uint8_t capital = (caps_ptr[0] == 0x01);
 
-	char key = 0x00;
-	if (key_c == KEY_CAPSLOCK_PRESSED || key_c == KEY_LEFT_SHIFT_PRESSED || key_c == KEY_RIGHT_SHIFT_PRESSED) { 
-		if (caps_ptr[0] == 0x00) {caps_ptr[0] = 0x01;}
-		else {caps_ptr[0] = 0x00;}
+	if (key_c == KEY_LEFT_SHIFT_PRESSED | key_c == KEY_RIGHT_SHIFT_PRESSED | key_c == KEY_LEFT_SHIFT_PRESSED) { 
 		return 0x00;
 	}
 	else if (key_c == KEY_BACKSPACE_PRESSED) {
@@ -91,62 +93,62 @@ char handle_key_input() {
 	else if (key_c == KEY_ENTER_PRESSED) {
 		return 0x02;
 	}
-
-	for (int i = 0; i < 27; i++) {
-		if (key_c == key_presses_enums[i]) {
-			if (capital) {key = key_chars[i];}
-			else {key = lower_key_chars[i];}
+	else {
+		for (int i = 0; i < 27; i++) {
+			if (key_c == key_presses_enums[i]) {
+				if (capital) {return upper_chars[i];}
+				else {return lower_chars[i];}
+			}
 		}
 	}
-	return key;
 }
 
-void print_ak_buff(unsigned int line) {
-	char *msg = (char *)LINE_BUFF;
-	print_ak(msg, line);
+void copy_str_p(char *sink, char *src) {
+	for (int i = 0; src[i] != '\0'; i++) {
+		sink[i] = src[i];
+	}
 }
 
-void get_input(char *in_ptr, unsigned int length, bool echo, unsigned int c_row, unsigned int c_col) {
-
+void get_input(char *inp_ptr, unsigned int length, bool echo, unsigned int c_row, unsigned int c_col) {
+	char *caps_ptr = (char *)CAPS_BUFF;
 	char *vid_mem = (char *) 0xb8000;
-	char *inp_mem = (char *) 0x00ed00;
+	char *inp_mem = (char *) INPUT_BUFF;
 
 	unsigned int c_start = (c_row * 80 * 2 + 2 * c_col);
-	int i=0;
-	char char_read = 0x00;
-	char char_proc = ' ';
+	int i = 0;
+	char key_c;
+	char key = ' ';
 
-	while (char_read != 0x02) {
-		for (i; i<length; i++) {
-			char_read = handle_key_input();
-			if (char_read == 0x00) {i--;} // Ignores CapsLock as key
-			else if (char_read == 0x01) { // Sets the char to space
+	while (key_c != 0x02) {
+		for (i; i < length && i >= 0; i++) {
+			key_c = handle_key_input();
+			if (key_c == 0x00) {
 				i--;
-				char_proc = ' ';
 			}
-			else {char_proc = char_read;}
-			if(echo) {
-				vid_mem[c_start + 2 * i] = char_proc;
+			else if (key_c == 0x01) {
+				i--;
+				key = ' ';
+			}
+			else if (key_c == 0x02) {
+				copy_str_p(inp_ptr, inp_mem);
+				return;
+			}
+			else {key = key_c;}
+
+			inp_mem[i] = key;
+			if (echo) {
+				vid_mem[c_start + 2 * i]  = key;
 				vid_mem[c_start + 2 * i + 1] = COLOR_SCHEME;
 			}
-			inp_mem[i] = char_read;
-			inp_mem[i+1] = '\0';
-
-			if (char_read == 0x02) {
-				i = length + 1;
-			}
-			if (char_read == 0x01) { // Backspace secondary decrement
-				i--;
-			}
+			if (key_c == 0x01 && i >= 0) {i--;}
 		}
-		if (i>=length) {i = length;} // Resets i
-		else {i = 0;}
+		if (i > length) {i = length;}
+		else if (i < 0) {i = 0;}
 		if (handle_key_input() == 0x01) {
-			vid_mem[c_start + 2 * (length - 1)] = ' ';
-			i--;
-		}
+			vid_mem[c_start + 2 * i - 2] = ' ';
+			if(i > 0) {i--;}
+		} 
 	}
-	in_ptr = inp_mem;
 }
 
 void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
@@ -183,6 +185,7 @@ uint16_t get_cursor_position(void)
 	return pos;
 }
 
+/*
 void move_cursor_up() {
 	uint8_t *x_ptr = (uint8_t *)CURSOR_POS_X;
 	uint8_t *y_ptr = (uint8_t *)CURSOR_POS_Y;
@@ -190,5 +193,6 @@ void move_cursor_up() {
 	if (y_ptr[0] > 0) {y_ptr[0]--;}
 	update_cursor(x_ptr[0], y_ptr[0]);
 }
+*/
 
 #endif KERN_UTILS_AK_H

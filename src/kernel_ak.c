@@ -11,7 +11,7 @@
 #include "keyboard.c"
 #include "kern_utils_ak.h"
 
-char test_input[16];
+char *test_input[16];
 
 void main_ak(void){
 	clear_ak();
@@ -23,9 +23,10 @@ void main_ak(void){
 	uint8_t *caps_ptr = (uint8_t *)CAPS_BUFF;
 	caps_ptr[0] = 0x01;
 
-	get_input(test_input, 16, true, 2, 0);
+	get_input(test_input, 14, true, 2, 0);
 
-	print_ak("ENTER PRESSED!", 3);
+	print_ak(test_input, 3);
+	print_ak("done!", 4);
 
 }
 

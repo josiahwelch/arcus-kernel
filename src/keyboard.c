@@ -1,11 +1,6 @@
 #include "keyboard.h"
+#include <stdint.h>
 #include "define.h"
-
-static unsigned char inb(unsigned short port) {
-    unsigned char ret;
-    asm volatile ( "inb %1, %0" : "=a"(ret) : "Nd"(port) );
-    return ret;
-} 
 
 static const kb_keycode us_querty_keycodes[0xE0] = {
     KEY_INVALID,//0x00 invalid
@@ -476,13 +471,13 @@ static const kb_keycode us_querty_keycodes_extra1[0xEE] = {
     KEY_INVALID,//0xEC,MULTIMEDIA
     KEY_INVALID,//0xED,MULTIMEDIA
 };
-static unsigned char get_scancode(){
+static uint8_t get_scancode(){
     while(!(inb(0x64) & 1)) asm volatile ("pause"); //check keyboard status port, see if there's a key available
     return inb(0x60); //get a key from the data port
 }
 
 kb_keycode get_keycode(){
-    unsigned char scancode=get_scancode();
+    uint8_t scancode=get_scancode();
     if(scancode==0xE0){//check if is extended set
         scancode=get_scancode();
         if(scancode==0x2A){

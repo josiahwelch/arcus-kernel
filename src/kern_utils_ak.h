@@ -73,7 +73,7 @@ char get_prev_key() {
 	return prev_key_c;
 }
 
-char key_presses_enums[] = {KEY_A_PRESSED, KEY_B_PRESSED, KEY_C_PRESSED, KEY_D_PRESSED, KEY_E_PRESSED, KEY_F_PRESSED, KEY_G_PRESSED, KEY_H_PRESSED, KEY_J_PRESSED, KEY_K_PRESSED, KEY_L_PRESSED, KEY_M_PRESSED, KEY_N_PRESSED, KEY_O_PRESSED, KEY_P_PRESSED, KEY_Q_PRESSED, KEY_R_PRESSED, KEY_S_PRESSED, KEY_T_PRESSED, KEY_U_PRESSED, KEY_V_PRESSED, KEY_W_PRESSED, KEY_X_PRESSED, KEY_Y_PRESSED, KEY_Z_PRESSED, KEY_SPACE_PRESSED};
+char key_presses_enums[] = {KEY_A_PRESSED, KEY_B_PRESSED, KEY_C_PRESSED, KEY_D_PRESSED, KEY_E_PRESSED, KEY_F_PRESSED, KEY_G_PRESSED, KEY_H_PRESSED, KEY_I_PRESSED, KEY_J_PRESSED, KEY_K_PRESSED, KEY_L_PRESSED, KEY_M_PRESSED, KEY_N_PRESSED, KEY_O_PRESSED, KEY_P_PRESSED, KEY_Q_PRESSED, KEY_R_PRESSED, KEY_S_PRESSED, KEY_T_PRESSED, KEY_U_PRESSED, KEY_V_PRESSED, KEY_W_PRESSED, KEY_X_PRESSED, KEY_Y_PRESSED, KEY_Z_PRESSED, KEY_SPACE_PRESSED};
 char upper_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 char lower_chars[] = "abcdefghijklmnopqrstuvwxyz ";
 
@@ -84,7 +84,7 @@ char handle_key_input() {
 
 	uint8_t capital = (caps_ptr[0] == 0x01);
 
-	if (key_c == KEY_LEFT_SHIFT_PRESSED | key_c == KEY_RIGHT_SHIFT_PRESSED | key_c == KEY_LEFT_SHIFT_PRESSED) { 
+	if (key_c == (char)KEY_CAPSLOCK_PRESSED) { 
 		return 0x00;
 	}
 	else if (key_c == KEY_BACKSPACE_PRESSED) {
@@ -109,8 +109,17 @@ void copy_str_p(char *sink, char *src) {
 	}
 }
 
+bool comp_str_p(char *ptr1, char *ptr2) {
+	ptr1 += '\0';
+	ptr2 += '\0';
+	for (int i = 0; ptr1[i] == ptr2[i]; i++) {
+		if (ptr1[i] == '\0') {return true;} // Can only check one char from ptr since both should be same
+	}
+	return false;
+}
+
+// Yes, I know that this is ugly
 void get_input(char *inp_ptr, unsigned int length, bool echo, unsigned int c_row, unsigned int c_col) {
-	char *caps_ptr = (char *)CAPS_BUFF;
 	char *vid_mem = (char *) 0xb8000;
 	char *inp_mem = (char *) INPUT_BUFF;
 
@@ -118,15 +127,16 @@ void get_input(char *inp_ptr, unsigned int length, bool echo, unsigned int c_row
 	int i = 0;
 	char key_c;
 	char key = ' ';
+	enable_cursor(0,0);
 
 	while (key_c != 0x02) {
-		for (i; i < length && i >= 0; i++) {
+		for (i; i < length && i >= -1; i++) {
 			key_c = handle_key_input();
 			if (key_c == 0x00) {
-				i--;
+				if (i > 0) {i--;}
 			}
 			else if (key_c == 0x01) {
-				i--;
+				if (i > 0) {i--;}
 				key = ' ';
 			}
 			else if (key_c == 0x02) {
@@ -139,14 +149,16 @@ void get_input(char *inp_ptr, unsigned int length, bool echo, unsigned int c_row
 			if (echo) {
 				vid_mem[c_start + 2 * i]  = key;
 				vid_mem[c_start + 2 * i + 1] = COLOR_SCHEME;
+				update_cursor(c_col + i, c_row);
 			}
+			if (key_c == 0x00 && i == 0) {i--;}
 			if (key_c == 0x01 && i >= 0) {i--;}
 		}
 		if (i > length) {i = length;}
 		else if (i < 0) {i = 0;}
 		if (handle_key_input() == 0x01) {
 			vid_mem[c_start + 2 * i - 2] = ' ';
-			if(i > 0) {i--;}
+			if (i > 0) {i--;}
 		} 
 	}
 }
@@ -168,7 +180,7 @@ void disable_cursor()
 
 void update_cursor(int x, int y)
 {
-	uint16_t pos = y * VGA_WIDTH + x;
+	uint16_t pos = (y + 1) * VGA_WIDTH + x;
 
 	outb(0x3D4, 0x0F);
 	outb(0x3D5, (uint8_t) (pos & 0xFF));

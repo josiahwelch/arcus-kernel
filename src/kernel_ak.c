@@ -2,8 +2,6 @@
 // 8/29/25
 // Kernel c file
 
-//NOTE: heavily influenced by https://github.com/chipsetx/Simple-Kernel-in-C-and-Assembly#
-
 #include "define.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -23,9 +21,11 @@ void main_ak(void){
 	uint8_t *caps_ptr = (uint8_t *)CAPS_BUFF;
 	caps_ptr[0] = 0x01;
 
-	get_input(test_input, 14, true, 2, 0);
+	print_ak("input \"SELAH\":", 2);
+	get_input(test_input, 14, true, 2, 14); 
 
-	print_ak(test_input, 3);
+	if (comp_str_p(test_input, "SELAH")) {print_ak("that is right!", 3);}
+	else {print_ak("nope!", 3);}
 	print_ak("done!", 4);
 
 }

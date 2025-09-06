@@ -118,6 +118,40 @@ bool comp_str_p(char *ptr1, char *ptr2) {
 	return false;
 }
 
+void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
+{
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+
+	outb(0x3D4, 0x0B);
+	outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
+}
+
+void disable_cursor()
+{
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, 0x20);
+}
+
+void update_cursor(int x, int y)
+{
+	uint16_t pos = (y + 1) * VGA_WIDTH + x;
+
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t) (pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+}
+uint16_t get_cursor_position(void)
+{
+	uint16_t pos = 0;
+	outb(0x3D4, 0x0F);
+	pos |= inb(0x3D5);
+	outb(0x3D4, 0x0E);
+	pos |= ((uint16_t)inb(0x3D5)) << 8;
+	return pos;
+}
+
 // Yes, I know that this is ugly
 void get_input(char *inp_ptr, unsigned int length, bool echo, unsigned int c_row, unsigned int c_col) {
 	char *vid_mem = (char *) 0xb8000;
@@ -125,7 +159,7 @@ void get_input(char *inp_ptr, unsigned int length, bool echo, unsigned int c_row
 
 	unsigned int c_start = (c_row * 80 * 2 + 2 * c_col);
 	int i = 0;
-	char key_c;
+	char key_c = 0x01;
 	char key = ' ';
 	enable_cursor(0,0);
 
@@ -162,49 +196,5 @@ void get_input(char *inp_ptr, unsigned int length, bool echo, unsigned int c_row
 		} 
 	}
 }
-
-void enable_cursor(uint8_t cursor_start, uint8_t cursor_end)
-{
-	outb(0x3D4, 0x0A);
-	outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
-
-	outb(0x3D4, 0x0B);
-	outb(0x3D5, (inb(0x3D5) & 0xE0) | cursor_end);
-}
-
-void disable_cursor()
-{
-	outb(0x3D4, 0x0A);
-	outb(0x3D5, 0x20);
-}
-
-void update_cursor(int x, int y)
-{
-	uint16_t pos = (y + 1) * VGA_WIDTH + x;
-
-	outb(0x3D4, 0x0F);
-	outb(0x3D5, (uint8_t) (pos & 0xFF));
-	outb(0x3D4, 0x0E);
-	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
-}
-uint16_t get_cursor_position(void)
-{
-	uint16_t pos = 0;
-	outb(0x3D4, 0x0F);
-	pos |= inb(0x3D5);
-	outb(0x3D4, 0x0E);
-	pos |= ((uint16_t)inb(0x3D5)) << 8;
-	return pos;
-}
-
-/*
-void move_cursor_up() {
-	uint8_t *x_ptr = (uint8_t *)CURSOR_POS_X;
-	uint8_t *y_ptr = (uint8_t *)CURSOR_POS_Y;
-
-	if (y_ptr[0] > 0) {y_ptr[0]--;}
-	update_cursor(x_ptr[0], y_ptr[0]);
-}
-*/
 
 #endif KERN_UTILS_AK_H

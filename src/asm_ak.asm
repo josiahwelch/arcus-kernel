@@ -2,6 +2,13 @@
 ; 8/29/25
 ; Assembly code to boot Arcus kernel from Grub or other bootloader
 
+bits 32
+
+section .bss
+align 16
+stack_area:        resb 16384      ; 16 KiB
+stack_top:
+
 %macro isr_err_stub 1
 isr_stub_%+%1:
     call exception_handler
@@ -15,7 +22,7 @@ isr_stub_%+%1:
 	iret
 %endmacro
 
-// Using these two macros...
+; Using these two macros...
 extern exception_handler
 isr_no_err_stub 0
 isr_no_err_stub 1
@@ -50,28 +57,15 @@ isr_no_err_stub 29
 isr_err_stub    30
 isr_no_err_stub 31
 
-// Stub table
+; Stub table
 global isr_stub_table
 isr_stub_table:
-%assign i 0 
-%rep    32 
-    dd isr_stub_%+i ; use DQ instead if targeting 64-bit
-%assign i i+1 
-%endrep
+	%assign i 0 
+	%rep    32 
+		dd isr_stub_%+i ; use DQ instead if targeting 64-bit
+	%assign i i+1 
+	%endrep
 
-// Helper function
-void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags);
-void idt_set_descriptor(uint8_t vector, void* isr, uint8_t flags) {
-	idt_entry_t* descriptor = &idt[vector];
-
-	descriptor->isr_low        = (uint32_t)isr & 0xFFFF;
-	descriptor->kernel_cs      = 0x08; // this value can be whatever offset your kernel code selector is in your GDT
-	descriptor->attributes     = flags;
-	descriptor->isr_high       = (uint32_t)isr >> 16;
-	descriptor->reserved       = 0;
-}
-
-bits 32
 section .text
 	align 4
 	dd 0x1badb002			; Magic #
@@ -83,5 +77,7 @@ extern main_ak
 
 start:
 	cli						; Stops interrupts
+	mov     esp, stack_top
+	xor     ebp, ebp
 	call main_ak
 	hlt 					; CPU halt

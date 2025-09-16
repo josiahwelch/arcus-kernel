@@ -13,8 +13,5 @@ global start
 extern main_ak
 
 start:
-	cli						; Stops interrupts
-	mov     esp, stack_top
-	xor     ebp, ebp
 	call main_ak
 	hlt 					; CPU halt

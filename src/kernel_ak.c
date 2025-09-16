@@ -8,8 +8,9 @@
 #include "io_ak.h"
 #include "keyboard.c"
 #include "kern_utils_ak.h"
+#include "idt_min.h"
 
-char *test_input[16];
+char test_input[16];
 
 void main_ak(void){
 	clear_ak();

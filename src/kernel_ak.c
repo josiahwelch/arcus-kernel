@@ -8,7 +8,6 @@
 #include "io_ak.h"
 #include "keyboard.c"
 #include "kern_utils_ak.h"
-#include "idt.c"
 
 char *test_input[16];
 
@@ -17,9 +16,6 @@ void main_ak(void){
 	print_ak("Arcus kernel loaded!", 0);
 	print_ak("Arcus OS is loading...", 1);
 	enable_cursor(4,5);
-
-	// Initializes the IDT
-	idt_init();
 
 	// Starts at caps
 	uint8_t *caps_ptr = (uint8_t *)CAPS_BUFF;

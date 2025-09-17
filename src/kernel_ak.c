@@ -22,10 +22,10 @@ void main_ak(void){
 	uint8_t *caps_ptr = (uint8_t *)CAPS_BUFF;
 	caps_ptr[0] = 0x01;
 
-	print_ak("input \"SELAH\":", 2);
+	print_ak("input \"HELLO\":", 2);
 	get_input(test_input, 14, true, 2, 14); 
 
-	if (comp_str_p(test_input, "SELAH")) {print_ak("that is right!", 3);}
+	if (comp_str_p(test_input, "HELLO")) {print_ak("that is right!", 3);}
 	else {print_ak("nope!", 3);}
 	print_ak("done!", 4);
 

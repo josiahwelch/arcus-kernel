@@ -18,6 +18,10 @@ void main_ak(void){
 	print_ak("Arcus OS is loading...", 1);
 	enable_cursor(4,5);
 
+	// Sets up IDT
+    static struct IdtEntry idt[256];
+    static struct Idtr idtr;
+
 	// Starts at caps
 	uint8_t *caps_ptr = (uint8_t *)CAPS_BUFF;
 	caps_ptr[0] = 0x01;

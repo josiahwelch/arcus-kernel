@@ -10,6 +10,19 @@
 #include "kern_utils_ak.h"
 #include "idt_min.h"
 
+__attribute__((naked)) void isr80_common(void){
+    __asm__ __volatile__(
+        "pushad\n\t"              // save EAX..EDI
+        // write a visible char to VGA directly (no C call needed)
+        "mov eax, 0xB8000\n\t"
+        "mov dx, 0x0741\n\t"      // 'A' with light gray attr
+        "mov [eax], dx\n\t"       // drop at top-left; simple proof
+        "popad\n\t"
+        "add esp, 4\n\t"          // drop pushed vector
+        "iret\n\t"
+    );
+}
+
 char test_input[16];
 
 void main_ak(void){

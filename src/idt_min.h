@@ -24,3 +24,6 @@ static inline void idt_set(struct IdtEntry *idt, int n, void (*h)()){
     idt[n].off_hi   = (p >> 16) & 0xFFFF;
 }
 
+// exceptions_stub.c  (temporary)
+void idt_install_exceptions(void) { /* TODO: install 0..31 and lidt */ }
+

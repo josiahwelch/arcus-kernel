@@ -9,6 +9,8 @@
 #include "keyboard.c"
 #include "kern_utils_ak.h"
 #include "idt_min.h"
+#include "pic_pit.c"
+#include "idt_irq_init.c"
 
 __attribute__((naked)) void isr80_common(void){
     __asm__ __volatile__ (
@@ -28,6 +30,12 @@ __attribute__((naked)) void isr80_common(void){
 }
 
 char test_input[16];
+
+extern void idt_install_exceptions(void);  // from your Step 2 (CPU faults)
+extern void idt_install_irqs(void);        // from 3C
+void pic_remap(void);
+void pit_init(uint32_t hz);
+void pic_unmask(uint8_t irq);
 
 void main_ak(void){
 	clear_ak();
@@ -53,6 +61,24 @@ void main_ak(void){
 
 	// Triggering interrupt 0x80
 	//__asm__ __volatile__("int $0x80");
+
+	// 1) Exceptions: so faults won’t triple-fault while we bring IRQs up
+    idt_install_exceptions();
+
+    // 2) IRQ stubs into IDT (vectors 0x20..0x2F)
+    idt_install_irqs();
+
+    // 3) Remap PIC and unmask timer/keyboard
+    pic_remap();
+    pic_unmask(0);   // timer
+    pic_unmask(1);   // keyboard (optional)
+
+    // 4) Program PIT to 100 Hz
+    pit_init(100);
+
+    // 5) Enable interrupts and idle
+    __asm__ __volatile__("sti");
+    for(;;) __asm__ __volatile__("hlt");
 
 	// Starts at caps
 	uint8_t *caps_ptr = (uint8_t *)CAPS_BUFF;

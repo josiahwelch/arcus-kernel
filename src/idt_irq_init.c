@@ -1,9 +1,3 @@
-struct __attribute__((packed)) IdtEntry {
-    uint16_t off_lo, sel;
-    uint8_t  zero, type_attr; // For type_attr, 0x8E = present, ring0. 32-bit interrupt gate
-    uint16_t off_hi;
-};
-
 extern void lidt(void*);  // if you already have a NASM/GAS lidt; else inline below
 static inline void lidt_inline(void* idtr){ __asm__ __volatile__("lidt (%0)"::"r"(idtr)); }
 

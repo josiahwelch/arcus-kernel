@@ -48,7 +48,6 @@ static void vprint(const char* s){
     while(*s){ VGA[vpos++] = (uint8_t)(*s++) | (uint16_t)(0x07 << 8); }
 }
 
-/*
 volatile uint32_t g_ticks;  // 100 Hz wraps after ~497 days — fine for now
 
 void irq_handler_c(uint32_t irq){
@@ -62,4 +61,3 @@ void irq_handler_c(uint32_t irq){
 
     pic_eoi(irq);
 }
-*/

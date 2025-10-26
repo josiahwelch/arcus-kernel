@@ -1,6 +1,6 @@
 struct __attribute__((packed)) IdtEntry {
     uint16_t off_lo, sel;
-    uint8_t  zero, type_attr;
+    uint8_t  zero, type_attr; // For type_attr, 0x8E = present, ring0. 32-bit interrupt gate
     uint16_t off_hi;
 };
 

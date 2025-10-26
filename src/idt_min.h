@@ -1,12 +1,3 @@
-#pragma once
-
-struct __attribute__((packed)) IdtEntry {
-    uint16_t off_lo;
-    uint16_t sel;
-    uint8_t  zero;
-    uint8_t  type_attr;   // 0x8E = present, ring0, 32-bit interrupt gate
-    uint16_t off_hi;
-};
 struct __attribute__((packed)) Idtr {
     uint16_t limit;
     uint32_t base;

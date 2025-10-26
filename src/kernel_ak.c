@@ -11,6 +11,7 @@
 #include "idt_min.h"
 #include "pic_pit.c"
 #include "idt_irq_init.c"
+#include "irq_api.c"
 
 __attribute__((naked)) void isr80_common(void){
     __asm__ __volatile__ (
@@ -75,6 +76,8 @@ void main_ak(void){
 
     // 4) Program PIT to 100 Hz
     pit_init(100);
+
+	print_ak("test", 4");
 
     // 5) Enable interrupts and idle
     __asm__ __volatile__("sti");

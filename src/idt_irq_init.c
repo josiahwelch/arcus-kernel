@@ -3,7 +3,6 @@ struct __attribute__((packed)) IdtEntry {
     uint8_t  zero, type_attr;
     uint16_t off_hi;
 };
-struct __attribute__((packed)) Idtr { uint16_t limit; uint32_t base; };
 
 extern void lidt(void*);  // if you already have a NASM/GAS lidt; else inline below
 static inline void lidt_inline(void* idtr){ __asm__ __volatile__("lidt (%0)"::"r"(idtr)); }

@@ -49,12 +49,24 @@ static void vprint(const char* s){
 }
 
 volatile uint32_t g_ticks;  // 100 Hz wraps after ~497 days — fine for now
+volatile uint16_t minutes;  // For the clock in tooltip
+char min_str[3];
 
 void irq_handler_c(uint32_t irq){
     if (irq == 0){                    // timer
         g_ticks++;
-        if ((g_ticks % 100) == 0)     // ~1s at 100 Hz
-            vprint("tick\n");
+		if (g_ticks == 0) { // Initializer
+			print_row_ak("00", 0, 75);
+		}
+        else if ((g_ticks % 100) == 0) {    // ~1s at 100 Hz
+			//vprint("tick\n");
+		}
+		else if ((g_ticks % 6000) == 0) {
+			if (minutes >= 60) minutes=0;
+			cvtostr(min_str, minutes);
+			print_row_ak(min_str, 0, 75);
+			minutes++;
+		}
     }
     // (optional) consume keyboard scancodes to avoid buffer fill:
     if (irq == 1){ (void)inb(0x60); }

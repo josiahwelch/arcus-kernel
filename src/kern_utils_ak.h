@@ -11,7 +11,7 @@ void cvtostr(char *str, char char_input) {
 	int digit3 = 0;
 	unsigned char chr = char_input;
 
-	while (1) {
+	while (digit3 != chr) {
 		if (chr > 99) {
 			digit1++;
 			chr -= 100;
@@ -20,7 +20,6 @@ void cvtostr(char *str, char char_input) {
 			chr -= 10;
 		} else {
 			digit3 = chr;
-			}
 		}
 	}
 
@@ -30,6 +29,65 @@ void cvtostr(char *str, char char_input) {
 	str[3] = '\0';
 }
 */
+
+void cvtostr(char *str, char char_input) {
+	int digit1 = 0;
+	int digit2 = 0;
+	unsigned char chr = char_input;
+
+	while (digit2 != chr) {
+		if (chr > 9) {
+			digit1++;
+			chr -= 10;
+		} else {
+			digit2 = chr;
+		}
+	}
+
+	str[0] = digit1 + 48;
+	str[1] = digit2 + 48;
+	str[2] = '\0';
+}
+
+int print_col_ak(char *msg, unsigned int line, unsigned int color) {
+	char *mem = (char *) 0xb8000;
+	unsigned int i = (line * 80 * 2);
+
+	while (*msg != 0) {
+		if (*msg == '\n') {
+			line++; // Since newline goes to the next line...
+			i = (line * 80 * 2);
+			*msg++;
+		} else {
+			mem[i] = *msg;
+			*msg++;
+			i++;
+			mem[i] = color;
+			i++;
+		}
+	}
+return 1;
+}
+
+int print_row_ak(char *msg, unsigned int line, unsigned int row) {
+	char *mem = (char *) 0xb8000;
+	unsigned int i = (line * 80 * 2) + row * 2;
+
+	while (*msg != 0) {
+		if (*msg == '\n') {
+			line++; // Since newline goes to the next line...
+			i = (line * 80 * 2);
+			*msg++;
+		} else {
+			mem[i] = *msg;
+			*msg++;
+			i++;
+			mem[i] = COLOR_SCHEME;
+			i++;
+		}
+	}
+return 1;
+}
 
 int print_ak(char *msg, unsigned int line) {
 	char *mem = (char *) 0xb8000;

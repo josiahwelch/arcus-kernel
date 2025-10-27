@@ -40,8 +40,8 @@ void pic_unmask(uint8_t irq);
 
 void main_ak(void){
 	clear_ak();
-	print_ak("Arcus kernel loaded!", 0);
-	print_ak("Arcus OS is loading...", 1);
+	print_ak("Arcus kernel loaded!", 1);
+	print_ak("Arcus OS is loading...", 2);
 	enable_cursor(4,5);
 
 	// Sets up IDT
@@ -73,6 +73,9 @@ void main_ak(void){
     pic_remap();
     pic_unmask(0);   // timer
     pic_unmask(1);   // keyboard (optional)
+
+	// Creates the T.I.B.
+	print_col_ak("                                                                                ", 0, 128); // Around 80 spaces
 
     // 4) Program PIT to 100 Hz
     pit_init(100);
